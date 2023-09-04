@@ -7,7 +7,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
-type UserSegmentHistory struct {
+type Operation struct { // Define the Operation struct
 	UserID    int       `json:"user_id"`
 	Segment   string    `json:"segment"`
 	Operation string    `json:"operation"`
@@ -22,7 +22,7 @@ func AddUserSegmentHistory(userID int, segmentSlug string, operation string) err
 }
 
 func RegisterUserSegmentOperation(userID int, segmentSlug string, operation string) error {
-	// Вызовите функцию для добавления записи в таблицу user_segment_history
+	// Function for add params in table user_segment_history
 	err := AddUserSegmentHistory(userID, segmentSlug, operation)
 	if err != nil {
 		log.Printf("Failed to register user segment operation: %v", err)
@@ -31,34 +31,28 @@ func RegisterUserSegmentOperation(userID int, segmentSlug string, operation stri
 	return nil
 }
 
-// Back users history
-func GetActiveUserSegmentsWithinDateRange(userID int, startDate, endDate time.Time) ([]string, error) {
-	db := GetDB()
+func GetOperationsByDateRange(startDate, endDate time.Time) ([]Operation, error) {
+	db := GetDB() // Replace GetDB with your actual database connection setup
 
 	rows, err := db.Query(`
-        SELECT s.slug
-        FROM segments s
-        JOIN user_segments us ON s.slug = us.segment_slug
-        WHERE us.user_id = $1
-        AND us.timestamp >= $2
-        AND us.timestamp <= $3
-    `, userID, startDate, endDate)
+        SELECT user_id, segment_slug, operation, timestamp
+        FROM user_segment_history
+        WHERE timestamp >= $1 AND timestamp <= $2
+    `, startDate, endDate)
 
 	if err != nil {
-		log.Printf("Failed to fetch active user segments within date range: %v", err)
 		return nil, err
 	}
 	defer rows.Close()
 
-	var activeSegments []string
+	var operations []Operation
 	for rows.Next() {
-		var segmentSlug string
-		if err := rows.Scan(&segmentSlug); err != nil {
-			log.Printf("Error scanning segment slug: %v", err)
+		var op Operation
+		if err := rows.Scan(&op.UserID, &op.Segment, &op.Operation, &op.Timestamp); err != nil {
 			return nil, err
 		}
-		activeSegments = append(activeSegments, segmentSlug)
+		operations = append(operations, op)
 	}
 
-	return activeSegments, nil
+	return operations, nil
 }

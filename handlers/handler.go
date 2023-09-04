@@ -198,7 +198,7 @@ func DeleteUserSegments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Обновляем таблицу user_segment_history для фиксации удаляемых сегментов
+	// update user_segment_history for delit
 	for _, deletedSegment := range segmentsToDelete.Segments {
 		err = db.AddUserSegmentHistory(userID, deletedSegment, "delit")
 		if err != nil {
@@ -207,8 +207,6 @@ func DeleteUserSegments(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-
-	// Затем удалите сегменты из базы данных, как вы это делали ранее
 	err = deleteSegmentsForUser(userID, segmentsToDelete.Segments)
 	if err != nil {
 		log.Printf("Failed to delete segments for user: %v", err)

@@ -20,5 +20,7 @@ func main() {
 	r.HandleFunc("/users/{user_id}/segments", handler_pac.GetActiveSegments).Methods("GET")
 	r.HandleFunc("/users/{user_id}/segments", handler_pac.DeleteUserSegments).Methods("DELETE")
 
+	r.HandleFunc("/generate-report/{year}/{month}", handler_pac.GenerateReport).Methods("GET")
+
 	log.Fatal(http.ListenAndServe(":8080", r))
 }
