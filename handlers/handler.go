@@ -15,6 +15,9 @@ import (
 type Segment struct {
 	Slug string `json:"slug"`
 }
+type ResponseStruct struct {
+	Message string `json:"message"`
+}
 
 // UserSegments represents a structure for storing user information and their segments
 type UserSegments struct {
@@ -23,6 +26,16 @@ type UserSegments struct {
 }
 
 // CreateSegment is a handler method for creating a segment.
+
+// @Summary Create a segment
+// @Description Create a new segment.
+// @Tags Segments
+// @Accept json
+// @Produce json
+// // @Param request body Segment true "Segment information"
+// @Success 200 {object} ResponseStruct "Success"
+// @Failure 500 {object} ResponseStruct "Internal Server Error"
+
 func CreateSegment(w http.ResponseWriter, r *http.Request) {
 	var segment Segment
 	if err := json.NewDecoder(r.Body).Decode(&segment); err != nil {
@@ -72,7 +85,6 @@ func DeleteSegment(w http.ResponseWriter, r *http.Request) {
 func AddUserToSegment(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userIDStr := params["user_id"]
-
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
 		log.Printf("Invalid user ID: %v", err)
@@ -93,6 +105,14 @@ func AddUserToSegment(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Failed to get user's active segments: %v", err)
 		http.Error(w, "Failed to get user's active segments", http.StatusInternalServerError)
 		return
+	}
+	for _, segment := range userSegmentsData.Segments {
+		err := db.RegisterUserSegmentOperation(userID, segment, "add")
+		if err != nil {
+			log.Printf("Failed to register user segment operation: %v", err)
+			http.Error(w, "Failed to register user segment operation", http.StatusInternalServerError)
+			return
+		}
 	}
 
 	// Create a map to track existing segments for faster lookup
@@ -132,8 +152,9 @@ func AddUserToSegment(w http.ResponseWriter, r *http.Request) {
 	}{responseMessage}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
+
 }
 
 // Take key function
@@ -175,6 +196,7 @@ func GetActiveSegments(w http.ResponseWriter, r *http.Request) {
 func DeleteUserSegments(w http.ResponseWriter, r *http.Request) {
 	params := mux.Vars(r)
 	userIDStr := params["user_id"]
+	//segment := params["segment_slug"]
 
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
@@ -190,7 +212,15 @@ func DeleteUserSegments(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Call the function to delete segments for the user
+	// update user_segment_history for delit
+	for _, deletedSegment := range segmentsToDelete.Segments {
+		err = db.AddUserSegmentHistory(userID, deletedSegment, "delit")
+		if err != nil {
+			log.Printf("Failed to add user segment history: %v", err)
+			http.Error(w, "Failed to add user segment history", http.StatusInternalServerError)
+			return
+		}
+	}
 	err = deleteSegmentsForUser(userID, segmentsToDelete.Segments)
 	if err != nil {
 		log.Printf("Failed to delete segments for user: %v", err)

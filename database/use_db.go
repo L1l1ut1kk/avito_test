@@ -9,10 +9,10 @@ import (
 
 // GetDB returns the active database connection
 func GetDB() *sql.DB {
-	if DB == nil {
+	if db == nil {
 		log.Fatal("Database is not initialized. Call InitDB() before use.")
 	}
-	return DB
+	return db
 }
 func RemoveUserFromSegment(userID int, segmentSlug string) error {
 	db := GetDB()
