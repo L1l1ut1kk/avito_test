@@ -1,0 +1,12 @@
+basePath: /
+host: localhost:8080
+info:
+  contact:
+    name: Людмила Мишакова l1l1ut1kk@mail.ru
+  description: Task for internship
+  license:
+    name: Ubuntu 22.04
+  title: Avito test task
+  version: "1.0"
+paths: {}
+swagger: "2.0"

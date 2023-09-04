@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	DB        *sql.DB
+	db        *sql.DB
 	once      sync.Once
 	dbInitErr error
 )
@@ -19,9 +19,10 @@ func InitDB() error {
 		dbName := "user_segments"
 		user := "postgres"
 		password := "postgres"
+		host := "db"
 
 		// Connection string
-		connStr := "user=" + user + " password=" + password + " dbname=postgres sslmode=disable"
+		connStr := "user=" + user + " password=" + password + " host=" + host + " dbname=postgres sslmode=disable"
 		conn, err := sql.Open("postgres", connStr)
 		if err != nil {
 			log.Fatal(err)
@@ -46,8 +47,8 @@ func InitDB() error {
 		log.Println("Database created successfully")
 
 		// Connect to the user_segments database
-		connStr = "user=" + user + " password=" + password + " dbname=" + dbName + " sslmode=disable"
-		DB, err = sql.Open("postgres", connStr)
+		connStr = "user=" + user + " password=" + password + " host=" + host + " dbname=" + dbName + " sslmode=disable"
+		db, err = sql.Open("postgres", connStr)
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -65,7 +66,7 @@ func InitDB() error {
 
 func createTablesIfNotExist() error {
 	// Create the "segments" table if it doesn't exist
-	_, err := DB.Exec(`CREATE TABLE IF NOT EXISTS segments (
+	_, err := db.Exec(`CREATE TABLE IF NOT EXISTS segments (
 		id SERIAL PRIMARY KEY,
 		slug VARCHAR(255) UNIQUE
 	)`)
@@ -74,7 +75,7 @@ func createTablesIfNotExist() error {
 	}
 
 	// Create the "user_segments" table if it doesn't exist
-	_, err = DB.Exec(`CREATE TABLE IF NOT EXISTS user_segments (
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS user_segments (
 		id SERIAL PRIMARY KEY,
 		user_id INT,
 		segment_slug VARCHAR(255),
@@ -83,7 +84,7 @@ func createTablesIfNotExist() error {
 	if err != nil {
 		return err
 	}
-	_, err = DB.Exec(`CREATE TABLE IF NOT EXISTS user_segment_history (
+	_, err = db.Exec(`CREATE TABLE IF NOT EXISTS user_segment_history (
 		id SERIAL PRIMARY KEY,
 		user_id INT,
 		segment_slug VARCHAR(255),

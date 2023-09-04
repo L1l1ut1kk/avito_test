@@ -15,6 +15,9 @@ import (
 type Segment struct {
 	Slug string `json:"slug"`
 }
+type ResponseStruct struct {
+	Message string `json:"message"`
+}
 
 // UserSegments represents a structure for storing user information and their segments
 type UserSegments struct {
@@ -23,6 +26,16 @@ type UserSegments struct {
 }
 
 // CreateSegment is a handler method for creating a segment.
+
+// @Summary Create a segment
+// @Description Create a new segment.
+// @Tags Segments
+// @Accept json
+// @Produce json
+// // @Param request body Segment true "Segment information"
+// @Success 200 {object} ResponseStruct "Success"
+// @Failure 500 {object} ResponseStruct "Internal Server Error"
+
 func CreateSegment(w http.ResponseWriter, r *http.Request) {
 	var segment Segment
 	if err := json.NewDecoder(r.Body).Decode(&segment); err != nil {
@@ -139,8 +152,9 @@ func AddUserToSegment(w http.ResponseWriter, r *http.Request) {
 	}{responseMessage}
 
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(response)
 	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(response)
+
 }
 
 // Take key function

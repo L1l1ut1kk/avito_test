@@ -6,11 +6,26 @@ import (
 	"log"
 	"net/http"
 
+	_ "avito/docs"
+
+	httpSwagger "github.com/swaggo/http-swagger"
+
 	"github.com/gorilla/mux"
 )
 
+// @title           Avito test task
+// @version         1.0
+// @description     Task for internship
+// @contact.name   Людмила Мишакова l1l1ut1kk@mail.ru
+// @license.name  Ubuntu 22.04
+// @host      localhost:8080
+
+// @BasePath
 func main() {
 	r := mux.NewRouter()
+	r.PathPrefix("/swagger/").Handler(httpSwagger.Handler(
+		httpSwagger.URL("docs/*any"),
+	))
 	db.InitDB()
 
 	// HTTP request

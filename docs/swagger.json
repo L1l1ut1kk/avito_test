@@ -1,0 +1,17 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "Task for internship",
+        "title": "Avito test task",
+        "contact": {
+            "name": "Людмила Мишакова l1l1ut1kk@mail.ru"
+        },
+        "license": {
+            "name": "Ubuntu 22.04"
+        },
+        "version": "1.0"
+    },
+    "host": "localhost:8080",
+    "basePath": "/",
+    "paths": {}
+}
