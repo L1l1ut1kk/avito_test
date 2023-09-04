@@ -83,6 +83,16 @@ func createTablesIfNotExist() error {
 	if err != nil {
 		return err
 	}
+	_, err = DB.Exec(`CREATE TABLE IF NOT EXISTS user_segment_history (
+		id SERIAL PRIMARY KEY,
+		user_id INT,
+		segment_slug VARCHAR(255),
+		operation VARCHAR(10), -- "добавление" или "удаление"
+		timestamp TIMESTAMPTZ DEFAULT NOW()
+	)`)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
